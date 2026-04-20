@@ -80,17 +80,20 @@
 ## 6. 如何重現此專案 (Getting Started)
 
 ### 🛠️ 必備工具
-* **Windows 使用者：** * 安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/)。
+* **Windows 使用者：**
+    * 安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/)。
     * 安裝 [PowerShell 7](https://github.com/PowerShell/PowerShell)。
     * 下載 [GitLab Runner for Windows](https://docs.gitlab.com/runner/install/windows.html)。
 * **Linux 使用者：**
     * 安裝 `docker` 與 `docker-compose-plugin`。
 
 ### 🚀 快速啟動
-1.  **註冊 Runner：** 在 GitLab 專案中建立 Runner，並獲得 Registration Token。
-2.  **設定設定檔：** 修改 `C:\GitLab-Runner\config.toml`，設定 `executor = "shell"` 與 `shell = "pwsh"`。
-3.  **環境變數：** 確保 Runner 具備操作 Docker 的權限。
-4.  **推送程式碼：** 執行 `git push` 後即可在 GitLab 介面觀察全自動流水線。
+
+1. **Clone 專案與替換環境參數 (重要)：** 下載本專案後，請打開 `deployment/docker-compose.staging.yml` 檔案，將 `image:` 屬性中的 `<YOUR_GITLAB_USERNAME>` 替換為你自己的 GitLab 或 Docker Hub 帳號名稱，否則將無法正確拉取映像檔。
+2. **註冊 Runner：** 在 GitLab 專案中建立 Runner，並獲得 Registration Token。
+3. **設定設定檔：** 修改本機的 `C:\GitLab-Runner\config.toml`，設定 `executor = "shell"` 與 `shell = "pwsh"`。
+4. **環境變數：** 確保 Runner 具備操作 Docker 的權限。
+5. **推送程式碼：** 執行 `git push` 後即可在 GitLab 介面觀察全自動流水線。
 
 ---
 
