@@ -1,6 +1,6 @@
 services:
   it-agent-api:
-    image: registry.gitlab.com/chenkuanchung810905/llmops-it-agent:latest
+    image: registry.gitlab.com/<YOUR_GITLAB_USERNAME>/llmops-it-agent:latest
     container_name: it-agent-staging
     ports:
       - "8000:8000"
