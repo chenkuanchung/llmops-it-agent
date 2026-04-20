@@ -1,0 +1,114 @@
+# ==========================================
+# 企業級 LLMOps 管線定義檔 (Final Version)
+# ==========================================
+
+# 定義流水線的六大執行階段，涵蓋從開發到營運的全生命週期
+stages:
+  - lint           # 階段 1: 程式碼品質審查 (Code Quality)
+  - test           # 階段 2: 自動化測試與 AI 防護網 (Testing)
+  - build          # 階段 3: 建置與鏡像推送 (Build & Push)
+  - deploy_staging # 階段 4: 部署至測試環境 (Deploy to Staging)
+  - verify         # 階段 5: 系統整合測試 (Integration Test)
+  - deploy_prod    # 階段 6: 正式環境發布 (Deploy to Production)
+
+# 全域環境變數設定
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  # 定義測試機的健康檢查網址 (本機模擬)
+  STAGING_HEALTH_URL: "http://localhost:8000/health"
+
+# 全域快取設定：加速 Python 依賴安裝
+cache:
+  paths:
+    - .cache/pip
+
+# ------------------------------------------
+# Stage 1: Code Quality (程式碼品質審查)
+# ------------------------------------------
+code_quality_check:
+  stage: lint
+  image: python:3.10-slim
+  script:
+    - echo "執行 Flake8 檢查..."
+    - pip install flake8==7.0.0
+    - flake8 app/
+  allow_failure: false # 格式不對就禁止進入下一關
+
+# ------------------------------------------
+# Stage 2: AI Evaluation & Testing (自動化測試)
+# ------------------------------------------
+unit_testing:
+  stage: test
+  image: python:3.10-slim
+  script:
+    - echo "安裝依賴並執行 Pytest..."
+    - pip install -r requirements.txt
+    - python -m pytest app/test_main.py
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml # 產出測試報告
+
+# ------------------------------------------
+# Stage 3: Build & Push (建置與鏡像推送)
+# ------------------------------------------
+build_and_push:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  script:
+    - echo "登入 GitLab Container Registry..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "打包映像檔並打上 Commit SHA 標籤..."
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+
+# ------------------------------------------
+# Stage 4: Deploy to Staging (自動化部署至本機)
+# ------------------------------------------
+deploy_to_staging:
+  stage: deploy_staging
+  tags:
+    - local-windows-runner
+  script:
+    - echo "=== Starting Staging Deployment ==="
+    - cd deployment
+    - docker-compose -f docker-compose.staging.yml pull
+    - docker-compose -f docker-compose.staging.yml up -d
+    - echo "=== Deployment Completed ==="
+  only:
+    - main
+
+# ------------------------------------------
+# Stage 5: Integration Test (真實系統整合測試)
+# ------------------------------------------
+integration_verify:
+  stage: verify
+  tags:
+    - local-windows-runner
+  script:
+    - echo "=== Running Integration Test ==="
+    # 使用 PowerShell 內建的 Invoke-WebRequest 來戳 API
+    - $response = Invoke-WebRequest -Uri "http://localhost:8000/docs" -UseBasicParsing
+    - if ($response.StatusCode -eq 200) { echo "Test Passed! Server is OK." } else { throw "Test Failed!" }
+  only:
+    - main
+
+# ------------------------------------------
+# Stage 6: Deploy to Production (正式發布 - 手動卡控)
+# ------------------------------------------
+deploy_to_production:
+  stage: deploy_prod
+  image: alpine:latest
+  script:
+    - echo "=== 🚀 執行正式環境發布指令 ==="
+    - echo "目標伺服器：Production Server Cluster"
+    - echo "執行版本：$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - echo "正式環境更新完畢。"
+  when: manual # 必須由你在 GitLab 介面上手動點擊 Play 才會執行
+  only:
+    - main

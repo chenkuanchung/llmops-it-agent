@@ -2,8 +2,7 @@ services:
   it-agent-api:
     # 這裡要換成你專案專屬的 GitLab Registry 網址
     # 格式通常是：registry.gitlab.com/你的帳號/llmops-it-agent:latest
-    # 📝 替換為你自己的 GitLab 或 Docker Hub 帳號
-    image: registry.gitlab.com/<YOUR_GITLAB_USERNAME>/llmops-it-agent:latest
+    image: registry.gitlab.com/chenkuanchung810905/llmops-it-agent:latest
     container_name: it-agent-staging
     ports:
       - "8000:8000"
