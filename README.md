@@ -29,6 +29,21 @@
 
 ## 2. CI/CD 全自動管線架構
 
+```mermaid
+graph LR
+    A[Lint<br/>品質審查] --> B[Test<br/>單元測試]
+    B --> C[Build<br/>打包映像檔]
+    C --> D[Deploy Staging<br/>自動化部署]
+    D --> E[Verify<br/>系統整合測試]
+    E -->|Manual Trigger| F[Deploy Prod<br/>正式發布]
+    
+    style A fill:#e1f5fe,stroke:#0288d1
+    style B fill:#e1f5fe,stroke:#0288d1
+    style C fill:#fff3e0,stroke:#f57c00
+    style D fill:#e8f5e9,stroke:#388e3c
+    style E fill:#e8f5e9,stroke:#388e3c
+    style F fill:#fce4ec,stroke:#c2185b
+```
 
 本專案採用 6-Stage 流水線設計，模擬企業從程式碼提交到正式上線的完整生命週期：
 `Lint` ➔ `Test` ➔ `Build` ➔ `Deploy (Staging)` ➔ `Verify` ➔ `Deploy (Prod)`
