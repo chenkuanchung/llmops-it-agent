@@ -1,0 +1,7 @@
+fastapi==0.109.2
+uvicorn==0.27.1
+pydantic==2.6.1
+
+pytest==8.0.0      # 單元測試框架
+flake8==7.0.0      # 程式碼語法與排版檢查工具
+httpx==0.27.0

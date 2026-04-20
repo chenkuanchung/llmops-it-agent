@@ -1,0 +1,11 @@
+services:
+  it-agent-api:
+    # 這裡要換成你專案專屬的 GitLab Registry 網址
+    # 格式通常是：registry.gitlab.com/你的帳號/llmops-it-agent:latest
+    image: registry.gitlab.com/chenkuanchung810905/llmops-it-agent:latest
+    container_name: it-agent-staging
+    ports:
+      - "8000:8000"
+    restart: always # 確保伺服器重開機或當機時，服務會自動重啟
+    environment:
+      - ENV=staging
